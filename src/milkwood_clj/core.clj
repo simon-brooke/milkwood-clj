@@ -9,6 +9,23 @@
 
 ;;;; utilities - probably in the fullness of time a separate file
 
+
+(defn slide-window
+  "slide this lookback window. A lookback window is a list of at most depth tokens;
+  we slide it by appending this token to its tail, and possibly removing a token from
+  its head to make room. Oviously, we do this by compying, not by destructive
+  modification.
+
+  window: a flat sequence of tokens of length less than or equal to depth;
+  token: a token to append;
+  depth: the maximum length of the window."
+  [window token depth]
+  (let [newwindow (concat window (list token))]
+    (cond
+     (> (count newwindow) depth) (rest newwindow)
+     true newwindow)))
+
+
 ;; copied verbatim from old (pre 1.3) clojure.contrib; cant find where it's moved
   ;; to in new contrib structure.
   ;; see https://github.com/clojure/clojure-contrib/blob/master/modules/map-utils/src/main/clojure/clojure/contrib/map_utils.clj
@@ -85,21 +102,6 @@
 
 ;;;; write side
 
-
-(defn slide-window
-  "slide this lookback window. A lookback window is a list of at most depth tokens;
-  we slide it by appending this token to its tail, and possibly removing a token from
-  its head to make room. Oviously, we do this by compying, not by destructive
-  modification.
-
-  window: a flat sequence of tokens of length less than or equal to depth;
-  token: a token to append;
-  depth: the maximum length of the window."
-  [window token depth]
-  (let [newwindow (concat window (list token))]
-    (cond
-     (> (count newwindow) depth) (rest newwindow)
-     true newwindow)))
 
 (defn next-tokens
   "Given these rules and this path, return a list of valid next tokens to emit.
