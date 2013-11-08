@@ -23,15 +23,7 @@
    rules: a rule tree (i.e. a recursively nested map token => rule-tree);
    path: a flat sequence of tokens."
   [rules path]
-  (cond
-   ;; if we have no more path, we're done.
-   (empty? path) nil
-   ;; if we have no more rules, compose a rule from what's left of the path
-   (empty? rules) (compose-rule path)
-   ;; replace in the rules the rule for the first of the path, with this new
-   ;; rule generated from the rest of the path and the old rule for the first
-   ;; of the path.
-   true (merge-rules rules (add-rule (rules (first path)) (rest path)))))
+  (merge-rules rules (compose-rule path)))
 
 (defn analyse-tokens
   "Read this sequence of tokens and process it into rules.
