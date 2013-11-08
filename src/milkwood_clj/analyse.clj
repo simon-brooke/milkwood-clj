@@ -23,7 +23,6 @@
    rules: a rule tree (i.e. a recursively nested map token => rule-tree);
    path: a flat sequence of tokens."
   [rules path]
-  (prn  "Rule: " path)
   (cond
    ;; if we have no more path, we're done.
    (empty? path) nil
