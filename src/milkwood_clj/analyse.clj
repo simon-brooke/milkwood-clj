@@ -43,7 +43,6 @@
   tokens: the sequence of tokens we're reading;
   depth: the depth of rules/length of window we're considering."
   [rules anger tokens depth]
-  (.println System.err (str (length tokens)))
   (cond
    (empty? tokens) rules
    true (let [token (first tokens) rage (utils/slide-window anger token depth)]
