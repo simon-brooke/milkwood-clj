@@ -23,6 +23,7 @@
    rules: a rule tree (i.e. a recursively nested map token => rule-tree);
    path: a flat sequence of tokens."
   [rules path]
+  (prn  "Rule: " path)
   (cond
    ;; if we have no more path, we're done.
    (empty? path) nil
@@ -52,6 +53,7 @@
            ;; else just continue without adding a rule.
            true (analyse-tokens rules rage (rest tokens) depth)))))
 
+
 (defn analyse-file
   "Read this file and process it into rules.
 
@@ -59,3 +61,4 @@
   depth: the depth of rules/length of window we're considering"
   [file depth]
   (analyse-tokens nil nil (map (fn [string] (.toLowerCase string)) (re-seq  #"\w+\'s|\w+|\p{Punct}" (slurp file))) depth))
+

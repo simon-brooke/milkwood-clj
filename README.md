@@ -21,7 +21,7 @@ FIXME: listing of options this app accepts.
 
 ### Bugs
 
-...
+Not so much a bug, but as I've written this all as pure recursive functions it's vulnerable to stack exhaustion exceptions. I've specified extended stack size in the project file, but that won't be sufficient for analysing large texts.
 
 
 
