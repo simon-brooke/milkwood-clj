@@ -56,4 +56,7 @@
   file: the path name of a file to read;
   depth: the depth of rules/length of window we're considering"
   [file depth]
-  (analyse-tokens nil nil (map (fn [string] (.toLowerCase string)) (re-seq  #"\w+\'[st]|\w+|\p{Punct}" (slurp file))) depth))
+  (analyse-tokens nil nil
+                  (map
+                   (fn [string] (.toLowerCase string))
+                   (re-seq  #"\w+\'[stdm]|\w+|\p{Punct}" (slurp file))) depth))

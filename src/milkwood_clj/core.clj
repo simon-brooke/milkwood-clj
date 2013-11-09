@@ -20,7 +20,8 @@
                        ["-t" "--tuple-length"
                         "The length of the sequences to analyse it into (integer)"
                         :parse-fn #(Integer. %)
-                        :default 2]) file (arguments :file)]
+                        :default 2])
+        file (arguments :file)]
     (cond
      (= file nil) (print banner)
      (arguments :help) (print banner)
@@ -28,6 +29,6 @@
            (synthesise/compose-nonsense
             (analyse/analyse-file file (arguments :tuple-length))
             (arguments :output-length))))
-    (prn "\n")))
+    (flush)))
 
 
