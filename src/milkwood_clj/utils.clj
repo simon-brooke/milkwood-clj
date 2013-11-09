@@ -3,7 +3,16 @@
    [clojure.set :as set])
   (:gen-class))
 
-;;;; utilities - probably in the fullness of time a separate file
+(defn rule-tree-depth
+  "Return the depth of this rule tree.
+
+  rules: a rule tree.
+  NOTE: it is possible that there might be some short rules in a rule tree, so this
+  implementation is not entirely safe."
+  [rules]
+  (cond
+   (empty? rules) 0
+   true (+ 1 (apply min (map (fn [key] (rule-tree-depth (rules key))) (keys rules))))))
 
 
 (defn slide-window

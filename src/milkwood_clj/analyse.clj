@@ -14,7 +14,12 @@
    true (hash-map (first path) (compose-rule (rest path)))))
 
 
-(defn merge-rules [these those]
+(defn merge-rules
+  "Merge two rule trees.
+
+  these: a rule tree;
+  those: a rule tree."
+  [these those]
   (utils/deep-merge-with set/union these those))
 
 (defn add-rule
@@ -51,5 +56,4 @@
   file: the path name of a file to read;
   depth: the depth of rules/length of window we're considering"
   [file depth]
-  (analyse-tokens nil nil (map (fn [string] (.toLowerCase string)) (re-seq  #"\w+\'s|\w+|\p{Punct}" (slurp file))) depth))
-
+  (analyse-tokens nil nil (map (fn [string] (.toLowerCase string)) (re-seq  #"\w+\'[st]|\w+|\p{Punct}" (slurp file))) depth))
