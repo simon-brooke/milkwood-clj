@@ -4,6 +4,12 @@
    [clojure.set :as set])
   (:gen-class))
 
+(def token-pattern
+  "Regular expression used to split input into tokens."
+;;  #"\w+\'[stdm]|\w+|\p{Punct}"
+    #"\w+['-]\w+|\w+|\p{Punct}"
+  )
+
 (defn compose-rule
   "Compose a new rule tree (containing (obviously) only one rule) from this path.
 
@@ -57,6 +63,4 @@
   depth: the depth of rules/length of window we're considering"
   [file depth]
   (analyse-tokens nil nil
-                  (map
-                   (fn [string] (.toLowerCase string))
-                   (re-seq  #"\w+\'[stdm]|\w+|\p{Punct}" (slurp file))) depth))
+                   (re-seq token-pattern (slurp file)) depth))

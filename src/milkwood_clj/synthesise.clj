@@ -4,7 +4,10 @@
   (:gen-class))
 
 
-(def end-magic-token "END")
+(def end-magic-token
+  "A token to mark the end of the generated test, used to
+  distinguish completion from failure."
+  "ENDMAGICTOKEN")
 
 (defn next-tokens
   "Given these rules and this path, return a list of valid next tokens to emit.

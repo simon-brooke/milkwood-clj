@@ -10,7 +10,10 @@
 (defn -main
   "Parse command line arguments and kick off the process."
   [& args]
-  (let [[arguments _ banner] (cli args ["-f" "--file" "The path name of the file to analyse (string)"]
+  (let [[arguments _ banner] (cli args
+                                  "Rule driven nonsense generator.
+See http://codekata.pragprog.com/2007/01/kata_fourteen_t.html"
+                       ["-f" "--file" "The path name of the file to analyse (string)"]
                        ["-l" "--output-length"
                         "The length in tokens of the output to generate (integer)"
                         :parse-fn #(Integer. %)
