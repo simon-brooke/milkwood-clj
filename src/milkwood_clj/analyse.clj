@@ -4,8 +4,10 @@
    [clojure.set :as set])
   (:gen-class))
 
-(def token-pattern
-  "Regular expression used to split input into tokens."
+(def ^:const token-pattern
+  "Regular expression used to split input into tokens.
+   TODO: note that backslash-w captures underscores as word characters.
+   Probably better to use [a-zA-Z]*."
 ;;  #"\w+\'[stdm]|\w+|\p{Punct}"
     #"\w+['-]\w+|\w+|\p{Punct}"
   )

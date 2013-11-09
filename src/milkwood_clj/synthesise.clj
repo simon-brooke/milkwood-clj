@@ -3,11 +3,29 @@
    [milkwood-clj.utils :as utils])
   (:gen-class))
 
+(def ^:const av-sentences-per-para
+     "Average number of sentences in a paragraph"
+     5)
 
-(def end-magic-token
+(def ^:const end-magic-token
   "A token to mark the end of the generated test, used to
   distinguish completion from failure."
   "ENDMAGICTOKEN")
+
+(def ^:const end-of-sentence-pattern
+  "Pattern which matches end of sentence tokens."
+  #"^[.!?]$")
+
+(def ^:const punctuation-pattern
+  "Pattern which matches punctuation."
+  #"^\p{Punct}$")
+
+
+(defn end-of-sentence? [token]
+  (re-find end-of-sentence-pattern token))
+
+(defn punctuation? [token]
+  (re-find punctuation-pattern token))
 
 (defn next-tokens
   "Given these rules and this path, return a list of valid next tokens to emit.
@@ -80,16 +98,60 @@
           true (cons (first options) nonsense))
          ))))
 
+(defn top-and-tail
+  "Top and tail this sequence of tokens so that it starts at the beginning of a sentence
+   and ends at the end of one.
+
+   output: a flat sequence of tokens"
+   ([output]
+    (top-and-tail output false (not (empty? (remove nil? (map end-of-sentence? output))))))
+   ([output topped? end-in-sight?]
+    (cond
+     ;; if there is no output, we're done.
+     (empty? output) nil
+     ;; if there are no end-of-sentence markers in the output, return the output and we're done.
+     (not end-in-sight?) output
+     ;; if we've topped the output...
+     topped?
+     (cond
+       ;; if the first thing in the output is an end-of-sentence marker, continue, checking whether there's another.
+      (end-of-sentence? (first output))
+      (let [another? (not (empty? (remove nil? (map end-of-sentence? (rest output)))))]
+        (cond
+         ;; if there is another end-of-sentence yet to find, continue.
+         another? (cons (first output) (top-and-tail (rest output) topped? another?))
+         ;; otherwise, we're done.
+         true (list (first output))))
+      ;; otherwise just continue.
+      true (cons (first output) (top-and-tail (rest output) topped? end-in-sight?)))
+     ;; if the first thing in the output is an end-of-sentence marker, we've 'topped' and want the rest.
+     (end-of-sentence? (first output))
+     (top-and-tail (rest output) true (not (empty? (remove nil? (map end-of-sentence? (rest output))))))
+     ;; else discard the head and continue
+     true
+     (top-and-tail (rest output)) topped? end-in-sight?)))
+
+
 (defn write-token
   [token]
-  "Write a single token to the output, doing some basic orthographic tricks.
+  "Write a single token to the output, performing some basic orthographic tricks.
 
    token: the token to write."
   (cond
-   (= token end-magic-token) nil
-   (re-find #"^[.!?]$" token) (do (print token) (cond (= (rand-int 5) 0) (print "\n\n")))
-   (re-find #"^\p{Punct}$" token) (print token)
-   true (print (str " " token))))
+   (= token end-magic-token)
+   ;; suppress the end magic token.
+   nil
+   (end-of-sentence? token)
+   ;; end of sentence: suppress leading space and possibly terminate paragraph.
+   (do (print token)
+     (cond
+      (= (rand-int av-sentences-per-para) 0) (print "\n\n")))
+   (punctuation? token)
+   ;; other punctuation: suppress leading whitespace.
+   (print token)
+   true
+   ;; everything else, print leading space and token.
+   (print (str " " token))))
 
 (defn write-output
   "Write this output, doing little orthographic tricks to make it look superficially
@@ -99,4 +161,5 @@
 
    output: a sequence of tokens to write."
   [output]
-  (dorun (map write-token output)))
+  (dorun (map write-token (top-and-tail output)))
+  (print "\n\n"))
