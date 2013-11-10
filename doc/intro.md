@@ -25,7 +25,7 @@ The first thing to note is these tuples are rules, with the first N-1 tokens act
     I saw => I
     saw I => conquered
 
-To be interpreted as 'if the last N-1 tokens I emitted match the left hand side or a rule, the right hand side of that rule is a candidate for what to emit next.'
+To be interpreted as 'if the last N-1 tokens I emitted match the left hand side of a rule, the right hand side of that rule is a candidate for what to emit next.'
 
 The next thing to note is that if we're seeking to reconstruct natural language text with at least a persuasive verisimilitude of sense, punctuation marks are tokens in their own right:
 
@@ -56,8 +56,8 @@ This enables us to consider our rules as a recursive map of maps:
     [
         I => [came => [COMMA]| saw => [COMMA]| conquered => [PERIOD]] |
         came => [COMMA => [I]] |
-	COMMA => [I => [saw | conquered]] |
-	saw => [COMMA => [I]]
+        COMMA => [I => [saw | conquered]] |
+        saw => [COMMA => [I]]
     ]
 
 And thus, essentially, as a tree that, given a path, we can walk. Matching becomes trivial and efficient.
@@ -66,7 +66,7 @@ Thus far we're almost language independent. I say almost, because in Prolog (whi
 
 ##Implementation: Java
 
-My Java implementation is [milkwood-java][]
+My Java implementation is [milkwood-java][].
 
 I started in Java, because that's what I was asked to do. Java (or C#, which is to a very close approximation the same language) is pretty much the state of the art as far as imperative, procedural languages go. Yes, I know it's object oriented, and I know Java methods are in principal functions not procedures. But it is still an imperative, procedural language. I say so, so it must be true. What I hope makes this essay interesting is that I then went on to reimplement in Clojure, so I can (and shall) compare and contrast the experience. I'm not (yet) an experienced Clojure hacker; I'm an old Lisp hacker, but I'm rusty even in Lisp, and Clojure isn't really very Lisp-like, so my Clojure version is probably sub-optimal.
 
@@ -95,6 +95,8 @@ There are things I'm not proud of in the Java implementation and I may at some s
 
 ## Clojure implementation
 
+My Clojure implementation is [milkwood-clj][].
+
 Some things to say about the Clojure implementation before I start. First, I implemented it in my own time, not under time pressure. Second, although I'm quite new to Clojure, I'm an old Lisp hacker, and even when I'm writing Java there are elements of Lisp-style in what I write. Thirdly, although I'm trying to write as idiomatic Clojure as I'm able, because that's what I'm trying to learn, I am a Lisp hacker at heart and consequently use **cond** far more than most Clojure people do - despite the horrible bastardised mess Clojure has made of **cond**. Finally, it was written after the Java implementation so I was able to avoid some of the mistakes I'd made earlier.
 
 I used [LightTable][] as my working environment. I really like the ideas behind LightTable and suspect that in time it will become my IDE of choice, but I haven't got it working for me yet. Particularly I haven't got its 'documentation at cursor' function working, which, given my current (lack of) familiarity with the Clojure, is a bit of a nuisance.
@@ -111,17 +113,26 @@ The other trip was that **map**, in Clojure, is lazy. So when I tried to write m
         [output]
         (map write-token output))
 
-nothing at all was printed, and I couldn't understand why not. The solution is you have to wrap that **map** in a call to **dorun** to force it to evaluate.
+nothing at all was printed, and I couldn't understand why not. The solution is that you have to wrap that **map** in a call to **dorun** to force it to evaluate.
 
 Aside from that, writing in Clojure was a total joy. Being able to quickly test ideas in a **repl** ('Read Eval Print Loop') is a real benefit. But a clean functional language is so simple to write in, and data structures are so easy to build and walk.
 
 Another thing Clojure makes much easier is unit tests. I got bogged down in the mutual recursion part of the Java problem and unit tests would have helped me - but I didn't write them because the bureaucratic superstructure is just so heavy. Writing unit tests should be a matter of a moment, and in Clojure it is. 
 
+I broke the Clojure implementation into four files/namespace:
+
+* **analyse.clj** read in the input and compile it into a rule tree; more or les Tokeniser and Digester in [milkwood-java][];
+* **core.clj** essentially replaces Milkwood in [milkwood-java][]; parses command line arguments and kicks off the process;
+* **synthesise.clj** compose and emit the output; broadly equivalent to Composer and Writer in [milkwood-java][];
+* **utils.clj** small utility functions. Among other things, contains the equivalent of Window in [milkwood-java][].
+
+Additionally there are two test files, one each for analyse and synthesise, containing in total seven tests with eight assertions. Obviously this is not full test coverage; I wrote tests to test specific functions which I was uncertain about.
+
 ## Conclusion
 
 Obviously, all Java's bureaucracy does buy you something. It's a *very* strongly typed language; you can't (or at least it's very hard to) just pass things around without committing to exactly what they will be at compile time. That means that many problems will be caught at compile time. By contrast, many of the functions in my Clojure implementation depend on being passed suitable values and will break at run time if the values passed do not conform. 
 
-Also, of course, the JVM is optimised for Java. I've blogged quite a bit about [optimising the JVM for functional languages][]; but, in the meantime, my Java implementation executes about seven times as fast as my Clojure implementation (but I'm timing from the shell and I haven't yet instrumented how long the start up time is for Java vs Clojure). Also, of course, I'm not an experienced Clojure hacker and some of the things I'm doing are very inefficient. [Alioth's Clojure/Java figures][] suggest much less of a performance deficit. But if peformance is what critically matters to you, it seems to me that probably the performance of Java is better, and you at least need to do some further investigation.
+Also, of course, the JVM is optimised for Java. I've blogged quite a bit about [optimising the JVM for functional languages][]; but, in the meantime, my Java implementation executes about seven times as fast as my Clojure implementation (but I'm timing from the shell and I haven't yet instrumented how long the start up time is for Java vs Clojure). Also, of course, I'm not an experienced Clojure hacker and some of the things I'm doing are very inefficient; [Alioth's Clojure/Java figures][] suggest much less of a performance deficit. But if peformance is what critically matters to you, it seems to me that probably the performance of Java is better, and you at least need to do some further investigation.
 
 On the other hand, at bottom Java is fundamentally an Algol, which is to say it's fundamentally a bunch of hacks constructed around things people wanted to tell computers to do. It's a very developed Algol which has learned a great deal from the programming language experience over fifty years, but essentially it's just engineering. There's no profound underlying idea.
 
@@ -130,6 +141,7 @@ Clojure, on the other hand, is to a large extent pure Lambda calculus. It is muc
 [problem]: http://codekata.pragprog.com/2007/01/kata_fourteen_t.html "The problem specification"
 [LightTable]: http://www.lighttable.com/ "The IDE of the future?"
 [milkwood-java]: https://github.com/simon-brooke/milkwood-java "Milkwood in Java"
+[milkwood-clj]: https://github.com/simon-brooke/milkwood-clj "Milkwood in Clojure"
 [optimising the JVM for functional languages]: http://blog.journeyman.cc/search/label/Memory%20management "Essays on memory management"
 [Alioth's Clojure/Java figures]: http://benchmarksgame.alioth.debian.org/u64q/clojure.php "Computer Language Benchmarks Game"
 
