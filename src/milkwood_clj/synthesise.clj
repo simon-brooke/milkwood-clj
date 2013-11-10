@@ -159,7 +159,14 @@
    TODO: does not yet work. Should take an optional second argument,
       the file to write to if any (default to standard out).
 
-   output: a sequence of tokens to write."
-  [output]
-  (dorun (map write-token (top-and-tail output)))
-  (print "\n\n"))
+   output: a sequence of tokens to write;
+   destination: if not null, the name of the file to which to write it."
+  ([output destination]
+    (cond
+     destination
+     (let [text (with-out-str (write-output output))]
+       (spit destination text))
+     true (write-output output)))
+  ([output]
+    (dorun (map write-token (top-and-tail output)))
+    (print "\n\n")))

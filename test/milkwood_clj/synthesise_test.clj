@@ -7,3 +7,9 @@
     (is (= (top-and-tail '("a" "b" "c" "?" "d" "e" "f" "." "g" "h" "i" "!")) '("d" "e" "f" "." "g" "h" "i" "!")))
     (is (= (top-and-tail '("a" "b" "c" "?" "d" "e" "f" "." "g" "h" "i")) '("d" "e" "f" ".")))
     ))
+
+(deftest write-output-test
+  (testing "Test output to file"
+    (is (= (do ;; (spit "test.out" "")
+             (write-output '("Test" "output" ".") "test.out")
+             (slurp "test.out"))) "Test output.")))

@@ -24,14 +24,15 @@ See http://codekata.pragprog.com/2007/01/kata_fourteen_t.html"
                         "The length of the sequences to analyse it into (integer)"
                         :parse-fn #(Integer. %)
                         :default 2])
-        file (arguments :file)]
+        file (arguments :file)
+        output (arguments :output)]
     (cond
      (= file nil) (print banner)
      (arguments :help) (print banner)
      true (synthesise/write-output
            (synthesise/compose-nonsense
             (analyse/analyse-file file (arguments :tuple-length))
-            (arguments :output-length))))
+            (arguments :output-length)) output))
     (flush)))
 
 
